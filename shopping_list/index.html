@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping List</title>
+    <script src="https://kit.fontawesome.com/" crossorigin="anonymous"></script>
+    <script src="src/script.js"></script>
+</head>
+<body>
+<div class="container">
+    <div id="header">
+        <i class="fa-solid fa-list-check"></i>
+        <h1 id="title">Shoping List</h1>
+    </div>
+    <div id="input-area">
+        <form id="shoping-list-form">
+            <input type="text" id="item-input" placeholder="Add an item...">
+            <button type="submit" id="add-button"><i class="fa-solid fa-plus"></i> Add Item</button>
+        </form>
+    </div>
+
+    <div id="list">
+        <input type="text" id="filter" placeholder="Filter Items">
+        <ul id="shopping-list">
+            <!-- List items will be dynamically added here -->
+        </ul>
+    </div>
+
+    <div id="clear">
+        <button id="clear-button">
+            <i class="fa-solid fa-trash"></i>
+            Clear List
+        </button>
+    </div>
+</div>
+</body>
+</html>
