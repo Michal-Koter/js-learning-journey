@@ -2,97 +2,112 @@ let listItemsCount = 0; // Used to dynamic assign unique ids
 
 //TODO: add local storage to save the list items
 
+const Icons = {
+    TICK: "fa-solid fa-check",
+    X: "fa-solid fa-x"
+};
+
+function createBtn(itemId, iconClass, clickHandler) {
+    const icon = document.createElement("i");
+    icon.setAttribute("class", iconClass);
+
+    const button = document.createElement("button");
+    button.setAttribute("id", itemId);
+    button.appendChild(icon);
+    button.addEventListener("click", clickHandler);
+
+    return button;
+}
+
+function createRedOnlyItem(text, itemId) {
+    const deleteButton = createBtn(`deleteItem-${itemId}`, Icons.X, removeItemFromList);
+
+    const newItemReadOnly = document.createElement("div");
+    newItemReadOnly.innerText = text;
+    newItemReadOnly.appendChild(deleteButton);
+    newItemReadOnly.addEventListener("click", goToEditMode);
+    newItemReadOnly.setAttribute("id", `readOnly-${itemId}`);
+
+    return newItemReadOnly;
+}
+
+function creteEditableItem(text, itemId) {
+    const saveButton = createBtn(`saveItem-${itemId}`, Icons.TICK, saveEditedItem);
+
+    const itemTextInput = document.createElement("input");
+    itemTextInput.type = "text";
+    itemTextInput.value = text;
+    itemTextInput.setAttribute("id", `editTextInput-${itemId}`);
+
+    const newItemEditable = document.createElement("div");
+    newItemEditable.style.display = "none";
+    newItemEditable.setAttribute("id", `editable-${itemId}`);
+    newItemEditable.appendChild(itemTextInput);
+    newItemEditable.appendChild(saveButton);
+
+    return newItemEditable;
+}
+
+function createListItem(text, itemId) {
+    const newItemReadOnly = createRedOnlyItem(text, itemId);
+    const newItemEditable = creteEditableItem(text, itemId);
+
+    const newItem = document.createElement("li");
+    newItem.appendChild(newItemReadOnly);
+    newItem.appendChild(newItemEditable);
+
+    return newItem;
+}
+
 function addItemToList(e) {
     e.preventDefault();
 
     const inputText = e.target.children[0].value;
-    if (inputText === '') {
+    if (inputText === "") {
         return;
     }
-    e.target.children[0].value = '';
+    e.target.children[0].value = "";
 
-    const xIcon = document.createElement('i');
-    xIcon.setAttribute('class', 'fa-solid fa-x');
+    const newItem = createListItem(inputText, listItemsCount);
 
-    const deleteButton = document.createElement('button');
-    deleteButton.setAttribute("id", `deleteItem-${listItemsCount}`);
-    deleteButton.appendChild(xIcon);
-    deleteButton.addEventListener('click', removeItemFromList);
-
-    const newItemReadOnly = document.createElement('div');
-    newItemReadOnly.innerText = inputText;
-    newItemReadOnly.appendChild(deleteButton);
-    newItemReadOnly.addEventListener('click', goToEditMode);
-    newItemReadOnly.setAttribute('id', `readOnly-${listItemsCount}`);
-
-    const tickIcon = document.createElement('i');
-    tickIcon.setAttribute('class', 'fa-solid fa-check');
-
-    const saveButton = document.createElement('button');
-    const newItemEditable = document.createElement('div');
-    const itemTextInput = document.createElement('input');
-
-    saveButton.setAttribute("id", `saveItem-${listItemsCount}`);
-    saveButton.appendChild(tickIcon);
-    saveButton.addEventListener('click', saveEditedItem);
-
-    itemTextInput.type = 'text';
-    itemTextInput.value = inputText;
-    itemTextInput.setAttribute('id', `editTextInput-${listItemsCount}`);
-
-    newItemEditable.style.display = 'none';
-    newItemEditable.setAttribute('id', `editable-${listItemsCount}`);
-    newItemEditable.appendChild(itemTextInput);
-    newItemEditable.appendChild(saveButton);
-
-    const newItem = document.createElement('li');
-    newItem.appendChild(newItemReadOnly);
-    newItem.appendChild(newItemEditable);
-
-
-    const list = document.getElementsByTagName('ul')[0];
+    const list = document.getElementsByTagName("ul")[0];
     list.appendChild(newItem);
 
     listItemsCount++;
 }
 
 function removeItemFromList(e) {
-    const list = document.getElementsByTagName('ul')[0];
+    const list = document.getElementsByTagName("ul")[0];
     list.removeChild(e.currentTarget.parentElement.parentElement);
 }
 
 function goToEditMode(e) {
     const readOnly = e.currentTarget,
-        editable = readOnly.nextElementSibling,
-        listItem = readOnly.parentElement;
+        editable = readOnly.nextElementSibling;
 
-    readOnly.style.display = 'none';
-    editable.style.display = 'flex';
+    readOnly.style.display = "none";
+    editable.style.display = "flex";
 }
 
 function saveEditedItem(e) {
     const editable = e.currentTarget.parentElement,
-        readOnly = editable.previousElementSibling,
-        parentItem = editable.parentElement,
-        parentElementStringify = JSON.stringify(parentItem);
-
+        readOnly = editable.previousElementSibling;
 
     const newValue = editable.children[0].value;
-    if (newValue === '') {
+    if (newValue === "") {
         return;
     }
 
     readOnly.insertAdjacentText("afterbegin", newValue);
 
-    readOnly.style.display = 'flex';
-    editable.style.display = 'none';
+    readOnly.style.display = "flex";
+    editable.style.display = "none";
 }
 
 function filterListItems(e) {
-    const list = document.getElementsByTagName('ul')[0].children,
+    const list = document.getElementsByTagName("ul")[0].children,
         filterValue = e.target.value.toLowerCase();
-    console.log(list)
-    for (const listItem of list ) {
+    for (const listItem of list) {
         const text = listItem.firstChild.innerText.toLowerCase();
         listItem.style.display = text.includes(filterValue) ? "flex" : "none";
     }
@@ -103,9 +118,9 @@ function removeAllItems() {
     list.innerHTML = "";
 }
 
-window.addEventListener('load', () => {
-    const form = document.getElementsByTagName('form')[0];
-    form.addEventListener('submit', addItemToList);
+window.addEventListener("load", () => {
+    const form = document.getElementsByTagName("form")[0];
+    form.addEventListener("submit", addItemToList);
 
     const filterInput = document.getElementById("filter");
     let filterTimeout;
