@@ -1,4 +1,4 @@
-let listItemsCount = 0; // Used to dynamic assign unique ids
+let listItemsCount = Number(localStorage.getItem("itemCounter")) || 0; // Used to dynamic assign unique ids
 
 //TODO: add local storage to save the list items
 
@@ -19,47 +19,36 @@ function createBtn(itemId, iconClass, clickHandler) {
     return button;
 }
 
-function createRedOnlyItem(text, itemId) {
-    const deleteButton = createBtn(`deleteItem-${itemId}`, Icons.X, removeItemFromList);
+function createRedOnlyItem(item) {
+    const deleteButton = createBtn(`deleteItem-${item.id}`, Icons.X, onRemoveItem);
 
     const newItemReadOnly = document.createElement("div");
-    newItemReadOnly.innerText = text;
+    newItemReadOnly.innerText = item.text;
     newItemReadOnly.appendChild(deleteButton);
     newItemReadOnly.addEventListener("click", goToEditMode);
-    newItemReadOnly.setAttribute("id", `readOnly-${itemId}`);
+    newItemReadOnly.setAttribute("id", `readOnly-${item.id}`);
 
     return newItemReadOnly;
 }
 
-function creteEditableItem(text, itemId) {
-    const saveButton = createBtn(`saveItem-${itemId}`, Icons.TICK, saveEditedItem);
+function createEditableItem(item) {
+    const saveButton = createBtn(`saveItem-${item.id}`, Icons.TICK, onSaveEditedItem);
 
     const itemTextInput = document.createElement("input");
     itemTextInput.type = "text";
-    itemTextInput.value = text;
-    itemTextInput.setAttribute("id", `editTextInput-${itemId}`);
+    itemTextInput.value = item.text;
+    itemTextInput.setAttribute("id", `editTextInput-${item.id}`);
 
     const newItemEditable = document.createElement("div");
     newItemEditable.style.display = "none";
-    newItemEditable.setAttribute("id", `editable-${itemId}`);
+    newItemEditable.setAttribute("id", `editable-${item.id}`);
     newItemEditable.appendChild(itemTextInput);
     newItemEditable.appendChild(saveButton);
 
     return newItemEditable;
 }
 
-function createListItem(text, itemId) {
-    const newItemReadOnly = createRedOnlyItem(text, itemId);
-    const newItemEditable = creteEditableItem(text, itemId);
-
-    const newItem = document.createElement("li");
-    newItem.appendChild(newItemReadOnly);
-    newItem.appendChild(newItemEditable);
-
-    return newItem;
-}
-
-function addItemToList(e) {
+function onAddItem(e) {
     e.preventDefault();
 
     const inputText = e.target.children[0].value;
@@ -68,17 +57,62 @@ function addItemToList(e) {
     }
     e.target.children[0].value = "";
 
-    const newItem = createListItem(inputText, listItemsCount);
+    const item = {
+        id: ++listItemsCount,
+        text: inputText
+    };
+
+    addItemToList(item);
+    addItemToStorage(item);
+}
+
+function addItemToList(item) {
+    const newItemReadOnly = createRedOnlyItem(item);
+    const newItemEditable = createEditableItem(item);
+
+    const newItem = document.createElement("li");
+    newItem.appendChild(newItemReadOnly);
+    newItem.appendChild(newItemEditable);
 
     const list = document.getElementsByTagName("ul")[0];
     list.appendChild(newItem);
-
-    listItemsCount++;
 }
 
-function removeItemFromList(e) {
+function getItemsFromStorage() {
+    let itemFromStorage;
+    if (localStorage.getItem("items") === null) {
+        itemFromStorage = [];
+    } else {
+        itemFromStorage = JSON.parse(localStorage.getItem("items"));
+    }
+    return itemFromStorage;
+}
+
+function addItemToStorage(item) {
+    let itemFromStorage = getItemsFromStorage();
+
+    itemFromStorage.push(item);
+    localStorage.setItem("items", JSON.stringify(itemFromStorage));
+    localStorage.setItem("itemCounter", listItemsCount);
+}
+
+function onRemoveItem(e) {
+    const htmlElement = e.currentTarget.parentElement.parentElement;
+    const itemId = Number(htmlElement.firstChild.getAttribute("id").split("-")[1]);
+
+    removeItemFromList(htmlElement);
+    removeItemFromStorage(itemId);
+}
+
+function removeItemFromStorage(itemId) {
+    let itemFromStorage = getItemsFromStorage();
+    const filteredItems = itemFromStorage.filter(element => element.id !== itemId);
+    localStorage.setItem("items", JSON.stringify(filteredItems));
+}
+
+function removeItemFromList(htmlElement) {
     const list = document.getElementsByTagName("ul")[0];
-    list.removeChild(e.currentTarget.parentElement.parentElement);
+    list.removeChild(htmlElement);
 }
 
 function goToEditMode(e) {
@@ -89,19 +123,37 @@ function goToEditMode(e) {
     editable.style.display = "flex";
 }
 
-function saveEditedItem(e) {
-    const editable = e.currentTarget.parentElement,
-        readOnly = editable.previousElementSibling;
-
-    const newValue = editable.children[0].value;
+function onSaveEditedItem(e) {
+    const editableElement = e.currentTarget.parentElement,
+        newValue = editableElement.children[0].value;
     if (newValue === "") {
         return;
     }
 
-    readOnly.insertAdjacentText("afterbegin", newValue);
+    saveEditedItemToList(editableElement, newValue);
+    saveEditedItemToStorage(editableElement, newValue);
+}
+
+function saveEditedItemToList(editable, newValue) {
+    const readOnly = editable.previousElementSibling,
+    btn = readOnly.children[0];
+
+    readOnly.textContent = newValue;
+    readOnly.appendChild(btn);
 
     readOnly.style.display = "flex";
     editable.style.display = "none";
+}
+
+function saveEditedItemToStorage(editable, newValue) {
+    let itemFromStorage = getItemsFromStorage();
+    const itemId = Number(editable.getAttribute("id").split("-")[1]);
+    for (let item of itemFromStorage) {
+        if (item.id === itemId) {
+            item.text = newValue;
+        }
+    }
+    localStorage.setItem("items", JSON.stringify(itemFromStorage));
 }
 
 function filterListItems(e) {
@@ -113,14 +165,19 @@ function filterListItems(e) {
     }
 }
 
-function removeAllItems() {
+function onRemoveAllItems() {
     const list = document.getElementsByTagName("ul")[0];
     list.innerHTML = "";
+
+    localStorage.removeItem("items");
+    localStorage.removeItem("itemCounter");
 }
 
 window.addEventListener("load", () => {
+    getItemsFromStorage().forEach(item => addItemToList(item));
+
     const form = document.getElementsByTagName("form")[0];
-    form.addEventListener("submit", addItemToList);
+    form.addEventListener("submit", onAddItem);
 
     const filterInput = document.getElementById("filter");
     let filterTimeout;
@@ -130,6 +187,6 @@ window.addEventListener("load", () => {
     });
 
     const clearListBtn = document.getElementById("clear-button");
-    clearListBtn.addEventListener("click", removeAllItems);
+    clearListBtn.addEventListener("click", onRemoveAllItems);
 });
 
