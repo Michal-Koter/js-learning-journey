@@ -1,7 +1,5 @@
 let listItemsCount = Number(localStorage.getItem("itemCounter")) || 0; // Used to dynamic assign unique ids
 
-//TODO: add local storage to save the list items
-
 const Icons = {
     TICK: "fa-solid fa-check",
     X: "fa-solid fa-x"
@@ -13,6 +11,7 @@ function createBtn(itemId, iconClass, clickHandler) {
 
     const button = document.createElement("button");
     button.setAttribute("id", itemId);
+    button.classList.add("ml-auto", "p-2", "hover:bg-gray-200", "rounded-full", "transition-colors", "duration-200", "group-hover:text-gray-700");
     button.appendChild(icon);
     button.addEventListener("click", clickHandler);
 
@@ -24,6 +23,11 @@ function createRedOnlyItem(item) {
 
     const newItemReadOnly = document.createElement("div");
     newItemReadOnly.innerText = item.text;
+    newItemReadOnly.classList.add(
+        "flex", "items-center", "w-full", "pl-6", "pr-3", "py-1", "border-y-2", "border-l-2", "border-transparent", "min-h-[48px]",
+        "text-lg", "text-gray-700",
+        "cursor-pointer", "hover:text-blue-600",
+        "transition-colors");
     newItemReadOnly.appendChild(deleteButton);
     newItemReadOnly.addEventListener("click", goToEditMode);
     newItemReadOnly.setAttribute("id", `readOnly-${item.id}`);
@@ -37,10 +41,14 @@ function createEditableItem(item) {
     const itemTextInput = document.createElement("input");
     itemTextInput.type = "text";
     itemTextInput.value = item.text;
+    itemTextInput.classList.add("flex-1", "text-lg", "-my-2", "px-3", "py-2", "min-h-[48px]",
+        "border-2", "border-blue-400", "rounded",
+        "focus:outline-none", "focus:border-blue-600");
     itemTextInput.setAttribute("id", `editTextInput-${item.id}`);
 
     const newItemEditable = document.createElement("div");
     newItemEditable.style.display = "none";
+    newItemEditable.classList.add("flex", "items-center", "gap-2", "w-full", "px-3", "py-2", "min-h-[48px]");
     newItemEditable.setAttribute("id", `editable-${item.id}`);
     newItemEditable.appendChild(itemTextInput);
     newItemEditable.appendChild(saveButton);
@@ -71,6 +79,9 @@ function addItemToList(item) {
     const newItemEditable = createEditableItem(item);
 
     const newItem = document.createElement("li");
+    newItem.classList.add("bg-white", "p-4", "rounded-lg", "shadow-md",
+        "hover:shadow-lg", "transition-shadow", "duration-200",
+        "border", "border-gray-200", "group");
     newItem.appendChild(newItemReadOnly);
     newItem.appendChild(newItemEditable);
 
@@ -97,6 +108,8 @@ function addItemToStorage(item) {
 }
 
 function onRemoveItem(e) {
+    e.stopPropagation();
+
     const htmlElement = e.currentTarget.parentElement.parentElement;
     const itemId = Number(htmlElement.firstChild.getAttribute("id").split("-")[1]);
 
@@ -116,6 +129,10 @@ function removeItemFromList(htmlElement) {
 }
 
 function goToEditMode(e) {
+    if (e.target.tagName === "BUTTON" || e.target.tagName === "I") {
+        return;
+    }
+
     const readOnly = e.currentTarget,
         editable = readOnly.nextElementSibling;
 
@@ -136,7 +153,7 @@ function onSaveEditedItem(e) {
 
 function saveEditedItemToList(editable, newValue) {
     const readOnly = editable.previousElementSibling,
-    btn = readOnly.children[0];
+        btn = readOnly.children[0];
 
     readOnly.textContent = newValue;
     readOnly.appendChild(btn);
