@@ -1,11 +1,19 @@
 const apiURL = "https://jsonplaceholder.typicode.com/todos";
 
 function addTodoToDOM(todo) {
+    const checkbox = document.createElement("input");;
+    checkbox.type = "checkbox";
+    checkbox.classList.add("todo-checkbox");
+
     const div = document.createElement("div");
     div.classList.add("todo");
+    div.appendChild(checkbox);
     div.appendChild(document.createTextNode(todo.title));
     div.setAttribute("data-id", todo.id);
-    if (todo.completed) div.classList.add("done");
+    if (todo.completed) {
+        checkbox.checked = true;
+        div.classList.add("done");
+    }
     document.getElementById("todo-list").appendChild(div);
 }
 
@@ -42,8 +50,8 @@ function createTodo(e) {
 }
 
 function toggleCompleted(e) {
-    if (!e.target.classList.contains("todo")) return;
-    e.target.classList.toggle("done");
+    if (!e.target.classList.contains("todo-checkbox")) return;
+    e.target.parentElement.classList.toggle("done");
 
     updateTodo(e.target.dataset.id, e.target.classList.contains("done"));
 }

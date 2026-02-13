@@ -1,0 +1,57 @@
+#header {
+    text-align: center;
+    margin-top: 0.5em;
+    font-size: 2em;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#todo-form {
+    display: flex;
+
+}
+
+.todo-text {
+    padding: 10px;
+    font-size: 1.2em;
+    border: 1px solid black;
+    border-radius: 8px;
+}
+
+.todo-submit {
+    padding: 10px;
+    font-size: 1.2em;
+    border: 1px solid black;
+    border-radius: 8px;
+    background-color: lightgreen;
+    margin-left: 10px;
+}
+
+#todo-list {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 2em;
+}
+
+.todo {
+    display: flex;
+    align-items: center;
+    margin: 5px;
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 8px;
+    background-color: bisque;
+}
+
+.todo-checkbox {
+    margin-right: 10px;
+}
+
+.done {
+    background-color: burlywood;
+}
