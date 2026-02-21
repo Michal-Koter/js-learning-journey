@@ -68,3 +68,28 @@ Circle.prototype.logName = function() {
 
 const circle = new Circle("circle", 5);
 circle.logName();
+
+
+function Person(firstName, lastName) {
+    this._firstName = firstName;
+    this._lastName = lastName;
+
+    // Older approach to create getters and setters
+    Object.defineProperty(this, "firstName", {
+        get: function() {
+            return this._firstName;
+        },
+        set: function (value) {
+            this._firstName = value;
+        }
+    });
+
+    Object.defineProperty(this, "lastName", {
+        get: function() {
+            return this._lastName;
+        },
+        set: function (value) {
+            this._lastName = value;
+        }
+    });
+}
